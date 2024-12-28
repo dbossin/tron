@@ -208,20 +208,18 @@ def main() -> None:
 
     # -------- Main Program Loop -----------
     while not done:
-        p1_momentum = p1.momentum
-        # p2_momentum = p2.momentum
         for event in pygame.event.get():  # User did something
             if event.type == pygame.QUIT:  # If user clicked close
                 done = True  # Flag that we are done so we exit this loop
             elif event.type == pygame.KEYDOWN:
                 if event.key in P1_KEYS:
-                    p1.set_momentum(event.key, p1_momentum)
+                    p1.set_momentum(event.key)
                 if mode == "two_player":
                     if event.key in P2_KEYS:
-                        p2.set_momentum(event.key, p1_momentum)
+                        p2.set_momentum(event.key)
 
         if mode == "one_player":
-            p2.set_momentum(grid)
+            p2.set_agent_momentum(grid)
 
         # Move position of p1 and p2 based on momentum
         p1.move()
@@ -244,8 +242,6 @@ def main() -> None:
         sleep(0.1)
 
 
-# Be IDLE friendly. If you forget this line, the program will 'hang'
-# on exit.
 if __name__ == "__main__":
     main()
 
