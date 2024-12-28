@@ -1,6 +1,6 @@
-
 import pygame
 from player import Player
+from agent import AgentPlayer
 from time import sleep
 from typing import List
 
@@ -30,49 +30,61 @@ P2_KEYS = [pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d]
 
 pygame.init()
 
-FONTTITLE = pygame.font.SysFont("arial", 50)
+FONTTITLE = pygame.font.SysFont("arial", 30)
 FONTTITLE1 = pygame.font.SysFont("arial", 50)
 FONTTITLE2 = pygame.font.SysFont("arial", 30)
 FONTTITLE3 = pygame.font.SysFont("arial", 30)
+
+
 # Create a 2 dimensional array. A two dimensional
 # array is simply a list of lists.
 def out_of_bounds(player: Player) -> bool:
-    return ((player.x < 0) or (player.x > GRID_COLUMNS - 1) 
-        or player.y < 0 or player.y > GRID_ROWS - 1)
+    return (
+        (player.x < 0)
+        or (player.x > GRID_COLUMNS - 1)
+        or player.y < 0
+        or player.y > GRID_ROWS - 1
+    )
+
 
 def on_occupied_square(player: Player, grid: List[List[int]]) -> bool:
     cur_square_val = grid[player.y][player.x]
     return cur_square_val == 1 or cur_square_val == 2
 
+
 def illegal_position(player: Player, grid: bool) -> bool:
     return out_of_bounds(player) or on_occupied_square(player, grid)
 
-def collision_checker(p1: Player, p2: Player, grid: List[List[int]], screen: pygame.display):
-    #Check tie conditions
+
+def collision_checker(
+    p1: Player, p2: Player, grid: List[List[int]], screen: pygame.display
+):
+    # Check tie conditions
     if p1.x == p2.x and p1.y == p2.y:
-        game_over('tie', p1, p2, grid, screen)
+        game_over("tie", p1, p2, grid, screen)
     elif illegal_position(p1, grid) and illegal_position(p2, grid):
-        game_over('tie', p1, p2, grid, screen)
-    
+        game_over("tie", p1, p2, grid, screen)
+
     # P1 win codition
     elif (not illegal_position(p1, grid)) and illegal_position(p2, grid):
-        game_over('p1', p1, p2, grid, screen)
+        game_over("p1", p1, p2, grid, screen)
 
     elif illegal_position(p1, grid) and (not illegal_position(p2, grid)):
-        game_over('p2', p1, p2, grid, screen)
+        game_over("p2", p1, p2, grid, screen)
 
 
-
-def game_over(result: str, p1: Player, p2: Player, grid: List[List[int]], screen: pygame.display) -> None:
+def game_over(
+    result: str, p1: Player, p2: Player, grid: List[List[int]], screen: pygame.display
+) -> None:
     clock = pygame.time.Clock()
 
-    result_message =''
+    result_message = ""
 
-    if result == 'tie':
+    if result == "tie":
         result_message = "It's a tie"
-    elif result == 'p1':
+    elif result == "p1":
         result_message = "Player 1 wins!"
-    elif result == 'p2':
+    elif result == "p2":
         result_message = "Player 2 wins!"
 
     while True:
@@ -83,8 +95,11 @@ def game_over(result: str, p1: Player, p2: Player, grid: List[List[int]], screen
                 main()
         draw_grid(p1, p2, grid, screen)
 
-        screen.blit(FONTTITLE1.render('GAME OVER!', True, BLACK), (100, 250))
-        screen.blit(FONTTITLE2.render('Press any key to play again', True, BLACK), (80, 300))
+        screen.blit(FONTTITLE1.render("GAME OVER!", True, BLACK), (100, 250))
+        screen.blit(
+            FONTTITLE2.render("Press Enter for 1 Player, Tab for 2", True, BLACK),
+            (80, 300),
+        )
         screen.blit(FONTTITLE3.render(result_message, True, BLACK), (80, 350))
 
         clock.tick(60)
@@ -92,29 +107,38 @@ def game_over(result: str, p1: Player, p2: Player, grid: List[List[int]], screen
         sleep(0.1)
 
 
-def draw_grid(p1: Player, p2:Player , grid: List[List[int]], screen: pygame.display) -> None:
+def draw_grid(
+    p1: Player, p2: Player, grid: List[List[int]], screen: pygame.display
+) -> None:
     for row in range(GRID_ROWS):
-            for column in range(GRID_COLUMNS):
-                color = WHITE
-                if row == p1.y and column == p1.x:
-                    color = RED
-                elif row == p2.y and column == p2.x:
-                    color = BLUE
-                elif grid[row][column] == 1:
-                    color = GREEN
-                elif grid[row][column] == 2:
-                    color = ORANGE
+        for column in range(GRID_COLUMNS):
+            color = WHITE
+            if row == p1.y and column == p1.x:
+                color = RED
+            elif row == p2.y and column == p2.x:
+                color = BLUE
+            elif grid[row][column] == 1:
+                color = GREEN
+            elif grid[row][column] == 2:
+                color = ORANGE
 
-                pygame.draw.rect(screen,
-                                color,
-                                [(MARGIN + WIDTH) * column + MARGIN,
-                                (MARGIN + HEIGHT) * row + MARGIN,
-                                WIDTH,
-                                HEIGHT])
+            pygame.draw.rect(
+                screen,
+                color,
+                [
+                    (MARGIN + WIDTH) * column + MARGIN,
+                    (MARGIN + HEIGHT) * row + MARGIN,
+                    WIDTH,
+                    HEIGHT,
+                ],
+            )
 
 
-def standby(p1: Player, p2: Player, grid: List[List[int]], screen: pygame.display) -> None:
+def standby(
+    p1: Player, p2: Player, grid: List[List[int]], screen: pygame.display
+) -> None:
     clock = pygame.time.Clock()
+    mode = ""
 
     play = False
     while not play:
@@ -122,16 +146,26 @@ def standby(p1: Player, p2: Player, grid: List[List[int]], screen: pygame.displa
             if event.type == pygame.QUIT:  # If user clicked close
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
-                play = True
-        
+                if event.key == pygame.K_RETURN:
+                    play = True
+                    mode = "one_player"
+                if event.key == pygame.K_TAB:
+                    play = True
+                    mode = "two_player"
+
         draw_grid(p1, p2, grid, screen)
 
-        screen.blit(FONTTITLE.render('Press any key to begin!', True, BLACK), (20, 250))    
+        screen.blit(
+            FONTTITLE.render("Press Enter for 1 Player, Tab for 2", True, BLACK),
+            (20, 250),
+        )
 
         clock.tick(60)
         # Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
         sleep(0.1)
+
+    return mode
 
 
 def main() -> None:
@@ -160,34 +194,40 @@ def main() -> None:
     clock = pygame.time.Clock()
 
     # Create Player Instances
-    p1 = Player(GRID_COLUMNS // 2, GRID_ROWS // 4, 'down')
-    p2 = Player(GRID_COLUMNS // 2, round(GRID_ROWS * 0.75), 'up')
+    p1 = Player(GRID_COLUMNS // 2, GRID_ROWS // 4, "down")
+    p2 = Player(GRID_COLUMNS // 2, round(GRID_ROWS * 0.75), "up")
 
-    #Set first grid position to visited
+    # Set first grid position to visited
     grid[p1.y][p1.x] = 1
     grid[p2.y][p2.x] = 2
 
-    standby(p1, p2, grid, screen)
+    mode = standby(p1, p2, grid, screen)
+
+    if mode == "one_player":
+        p2 = AgentPlayer(GRID_COLUMNS // 2, round(GRID_ROWS * 0.75), "up")
 
     # -------- Main Program Loop -----------
     while not done:
         p1_momentum = p1.momentum
-        p2_momentum = p2.momentum
+        # p2_momentum = p2.momentum
         for event in pygame.event.get():  # User did something
             if event.type == pygame.QUIT:  # If user clicked close
                 done = True  # Flag that we are done so we exit this loop
-            elif event.type == pygame.KEYDOWN: 
+            elif event.type == pygame.KEYDOWN:
                 if event.key in P1_KEYS:
-                    p1.set_momentum(event.key, p1_momentum)    
-                elif event.key in P2_KEYS:
-                    p2.set_momentum(event.key, p2_momentum)
+                    p1.set_momentum(event.key, p1_momentum)
+                if mode == "two_player":
+                    if event.key in P2_KEYS:
+                        p2.set_momentum(event.key, p1_momentum)
 
+        if mode == "one_player":
+            p2.set_momentum(grid)
 
         # Move position of p1 and p2 based on momentum
         p1.move()
         p2.move()
-        
-        # Detect Collison, Out of Bounds, and Update Grid 
+
+        # Detect Collison, Out of Bounds, and Update Grid
         collision_checker(p1, p2, grid, screen)
 
         grid[p1.y][p1.x] = 1
@@ -203,9 +243,10 @@ def main() -> None:
         pygame.display.flip()
         sleep(0.1)
 
+
 # Be IDLE friendly. If you forget this line, the program will 'hang'
 # on exit.
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 
 pygame.quit()
